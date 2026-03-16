@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base}">
+
+<head>
+    <title>Gestión de Usuarios</title>
+</head>
+
+<body>
+    <div layout:fragment="page-title">Gestión de Usuarios</div>
+
+    <div layout:fragment="content">
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Usuarios Registrados</h3>
+                    <p class="card-subtitle">Administra los roles y niveles de acceso.</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre Completo</th>
+                            <th>Correo Institucional</th>
+                            <th>Rol Actual</th>
+                            <th style="text-align: right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${users}">
+                            <td>
+                                <span class="badge badge-locked" th:text="${u.username}">usuario</span>
+                            </td>
+                            <td th:text="${u.displayName}">Nombre</td>
+                            <td th:text="${u.email}">correo@edu.ar</td>
+                            <td>
+                                <span class="badge badge-unlocked" th:if="${u.role == 'ROLE_ADMIN'}" th:text="${u.roleLabel}"></span>
+                                <span class="badge badge-unlocked" th:if="${u.role == 'ROLE_EXTENSIONIST'}" th:text="${u.roleLabel}" style="background-color: var(--warning-light); color: var(--warning-dark);"></span>
+                                <span class="badge badge-unlocked" th:if="${u.role == 'ROLE_STUDENT'}" th:text="${u.roleLabel}" style="background-color: var(--bg-tertiary); color: var(--text-secondary);"></span>
+                            </td>
+                            <td style="text-align: right;">
+                                <form th:if="${u.username != currentUser.username}" th:action="@{/admin/users/role}" method="post" class="role-form" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+                                    <input type="hidden" name="username" th:value="${u.username}" />
+                                    <select name="role" class="form-input" style="padding: 0.25rem 0.5rem; height: auto;" onchange="this.form.submit()">
+                                        <option value="ROLE_STUDENT" th:selected="${u.role == 'ROLE_STUDENT'}">Estudiante</option>
+                                        <option value="ROLE_EXTENSIONIST" th:selected="${u.role == 'ROLE_EXTENSIONIST'}">Extensionista</option>
+                                        <option value="ROLE_ADMIN" th:selected="${u.role == 'ROLE_ADMIN'}">Administrador</option>
+                                    </select>
+                                </form>
+                                <span th:if="${u.username == currentUser.username}" class="badge badge-locked" style="background-color: var(--alert-light);">
+                                    Es tu cuenta
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                                No hay usuarios registrados.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base}">
+
+<head>
+    <title>Subir Tarea</title>
+</head>
+
+<body>
+
+    <div layout:fragment="page-title">Subir Tarea</div>
+
+    <main layout:fragment="content">
+        <div class="page-nav">
+            <a th:href="@{/meetings/{id}(id=${meeting.id})}" class="back-link">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd" />
+                </svg>
+                Ver Encuentro
+            </a>
+        </div>
+
+        <div class="detail-layout">
+            <div class="detail-main">
+                <div class="card meeting-info-card">
+                    <div class="meeting-info-header">
+                        <div>
+                            <h3 class="card-heading" th:text="${meeting.title}">Encuentro</h3>
+                            <div class="detail-meta-row">
+                                <span class="meta-item">
+                                    <svg viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span th:text="${#temporals.format(meeting.date, 'dd/MM/yyyy')}"></span>
+                                </span>
+                                <span class="meta-item">
+                                    <svg viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span
+                                        th:text="${#temporals.format(meeting.startTime, 'HH:mm')} + ' — ' + ${#temporals.format(meeting.endTime, 'HH:mm')}"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="deadline-info">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <span class="deadline-label">Fecha límite:</span>
+                                <span class="deadline-value"
+                                    th:text="${#temporals.format(meeting.date.minusDays(2), 'dd/MM/yyyy')} + ' (48hs antes)'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card form-card">
+                    <h2 class="section-title">Subir Tarea o Actividad</h2>
+                    <p class="section-subtitle">Las tareas deben subirse como mínimo 48 horas antes del encuentro.</p>
+
+                    <form th:action="@{/extensionist/tasks/upload}" method="post" class="meeting-form">
+                        <input type="hidden" name="meetingId" th:value="${meeting.id}" />
+                        <div class="form-group">
+                            <label class="form-label">Título de la Tarea / Actividad *</label>
+                            <input type="text" name="title" class="form-control" required
+                                placeholder="Ej: Dinámica de integración, Juego de roles..." />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción *</label>
+                            <textarea name="description" class="form-control form-textarea" required
+                                placeholder="Explicá de qué trata la actividad..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contenido / Archivo (texto)</label>
+                            <textarea name="fileContent" class="form-control form-textarea form-textarea-lg"
+                                placeholder="Pegá el contenido del archivo o instrucciones detalladas..."></textarea>
+                            <span class="form-hint">En una versión con base de datos se podrán subir archivos
+                                reales.</span>
+                        </div>
+                        <div class="form-actions">
+                            <a th:href="@{/meetings/{id}(id=${meeting.id})}" class="btn btn-outline">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Subir Tarea
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="detail-sidebar">
+                <div class="card">
+                    <h3 class="card-heading">Tareas Ya Subidas <span class="count-badge"
+                            th:text="${existingTasks.size()}"></span></h3>
+                    <div th:if="${#lists.isEmpty(existingTasks)}" class="empty-state-small"><span>No hay tareas subidas
+                            aún</span></div>
+                    <div class="task-list task-list-compact">
+                        <div th:each="task : ${existingTasks}" class="task-item task-item-compact">
+                            <div class="task-item-header">
+                                <span class="task-title" th:text="${task.title}"></span>
+                            </div>
+                            <span class="task-uploader" th:text="${task.uploaderDisplayName}"></span>
+                            <span class="task-date"
+                                th:text="${#temporals.format(task.uploadedAt, 'dd/MM HH:mm')}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+
+</html>

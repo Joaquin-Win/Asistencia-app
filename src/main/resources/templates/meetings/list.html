@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+
+<head>
+    <title>Mis Encuentros</title>
+</head>
+
+<body>
+
+    <div layout:fragment="page-title">Mis Encuentros</div>
+
+    <main layout:fragment="content">
+        <div class="dashboard-header">
+            <div>
+                <h2 class="section-title">Encuentros del Programa</h2>
+                <p class="section-subtitle">Registrá tu asistencia o revisá el contenido de cada encuentro</p>
+            </div>
+        </div>
+
+        <div class="meetings-list-layout">
+            <div th:each="meeting : ${meetings}" class="meeting-list-item"
+                th:classappend="${meeting.locked} ? 'locked' : ''">
+
+                <div class="meeting-list-left">
+                    <div class="meeting-date-block">
+                        <span class="date-day" th:text="${#temporals.format(meeting.date, 'dd')}">01</span>
+                        <span class="date-month"
+                            th:text="${#temporals.format(meeting.date, 'MMM', new java.util.Locale('es'))}">ENE</span>
+                    </div>
+                </div>
+
+                <div class="meeting-list-body">
+                    <div class="meeting-list-header">
+                        <h3 class="meeting-list-title" th:text="${meeting.title}">Título</h3>
+                        <div class="meeting-status-badge" th:text="${meeting.status}"></div>
+                    </div>
+                    <p class="meeting-list-desc" th:text="${meeting.description}">Descripción</p>
+                    <div class="meeting-list-meta">
+                        <span class="meta-item">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span
+                                th:text="${#temporals.format(meeting.startTime, 'HH:mm')} + ' — ' + ${#temporals.format(meeting.endTime, 'HH:mm')}"></span>
+                        </span>
+                        <span class="meta-item">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span th:text="${meeting.location}"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="meeting-list-actions">
+                    <th:block th:with="alreadyRegistered=${attendanceService.hasRegistered(meeting.id, username)}">
+                        <th:block th:if="${!meeting.locked and meeting.status != 'PASADA'}">
+                            <span th:if="${alreadyRegistered}" class="badge badge-success">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Asistencia Registrada
+                            </span>
+                            <a th:unless="${alreadyRegistered}" th:href="@{/meetings/{id}(id=${meeting.id})}"
+                                class="btn btn-primary btn-sm">Registrar Asistencia</a>
+                        </th:block>
+                        <span th:if="${meeting.locked}" class="badge badge-locked">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Cerrado
+                        </span>
+                    </th:block>
+
+                    <a th:href="@{/meetings/{id}(id=${meeting.id})}" class="btn btn-outline btn-sm">Ver Contenido</a>
+
+                    <a sec:authorize="hasRole('EXTENSIONIST')" th:if="${meeting.status != 'PASADA' and !meeting.locked}"
+                        th:href="@{/extensionist/tasks/{id}(id=${meeting.id})}" class="btn btn-secondary btn-sm">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Subir Tarea
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+
+</html>

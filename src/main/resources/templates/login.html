@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iniciar Sesión — Sistema de Asistencia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body class="login-body">
+
+<div class="login-bg">
+    <div class="login-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+</div>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <!-- Logo / Brand -->
+        <div class="login-brand">
+            <div class="login-logo">
+                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="20" fill="#3dbba7"/>
+                    <path d="M10 28 Q20 12 30 28" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <circle cx="20" cy="14" r="4" fill="white"/>
+                    <path d="M13 28 h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h1 class="login-title">Sistema de Asistencia</h1>
+            <p class="login-subtitle">Programa de Extensión Universitaria</p>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${param.error}" class="alert alert-error">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+            <span>Usuario o contraseña incorrectos.</span>
+        </div>
+        <div th:if="${param.logout}" class="alert alert-success">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <span>Sesión cerrada correctamente.</span>
+        </div>
+
+        <!-- Login Form -->
+        <form th:action="@{/login}" method="post" class="login-form">
+            <div class="form-group">
+                <label for="username" class="form-label">Usuario</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                    </svg>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Ingresá tu usuario" required autofocus/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Contraseña</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Ingresá tu contraseña" required/>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Iniciar Sesión
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+        </form>
+
+        <!-- Register hint -->
+        <div class="login-hint" style="text-align: center; margin-top: 1.5rem;">
+            <p class="hint-title">¿No tenés cuenta?</p>
+            <a th:href="@{/register}" style="color: #3dbba7; text-decoration: none; font-weight: 500;">Registrate acá</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

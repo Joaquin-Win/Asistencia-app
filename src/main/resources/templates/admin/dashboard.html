@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+
+<head>
+    <title>Dashboard Admin</title>
+</head>
+
+<body>
+
+    <div layout:fragment="page-title">Dashboard Administrador</div>
+
+    <main layout:fragment="content">
+        <div class="dashboard-header">
+            <div>
+                <h2 class="section-title">Encuentros del Programa</h2>
+                <p class="section-subtitle">Hacé click en un encuentro para ver el detalle de asistentes</p>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a th:href="@{/admin/meetings/export-all}" class="btn btn-success" style="background-color: #107c41; color: white;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:0.5rem">
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    </svg>
+                    Exportar Todo (Excel)
+                </a>
+                <a th:href="@{/admin/meetings/new}" class="btn btn-primary">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Nuevo Encuentro
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-primary">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${meetings.size()}">0</span>
+                    <span class="stat-label">Total Encuentros</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-success">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${totalAttendees}">0</span>
+                    <span class="stat-label">Total Asistencias</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-warning">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${lockedCount}">0</span>
+                    <span class="stat-label">Bloqueados</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-info">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${upcomingCount}">0</span>
+                    <span class="stat-label">Próximos</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meeting cards grid -->
+        <div class="meetings-grid">
+            <div th:each="meeting : ${meetings}" class="meeting-card" th:classappend="${meeting.locked} ? 'locked' : ''"
+                th:attr="data-id=${meeting.id}" onclick="openPanel(this)">
+
+                <div class="meeting-card-header">
+                    <div class="meeting-status-badge" th:text="${meeting.status}"
+                        th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(#strings.replace(#strings.replace(#strings.replace(meeting.status,'Ó','o'),'É','e'),'Á','a'),' ',''))}">
+                    </div>
+                    <div class="meeting-card-actions" onclick="event.stopPropagation()">
+                        <form th:action="@{/admin/meeting/{id}/toggle-lock(id=${meeting.id})}" method="post"
+                            style="display:inline;">
+                            <button type="submit" th:title="${meeting.locked} ? 'Desbloquear' : 'Bloquear'"
+                                class="btn-icon" th:classappend="${meeting.locked} ? 'btn-unlock' : 'btn-lock'">
+                                <svg th:if="${meeting.locked}" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
+                                </svg>
+                                <svg th:unless="${meeting.locked}" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </form>
+                        <a th:href="@{/admin/meetings/edit/{id}(id=${meeting.id})}" class="btn-icon btn-edit"
+                            onclick="event.stopPropagation()" title="Editar">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path
+                                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="meeting-card-body">
+                    <h3 class="meeting-card-title" th:text="${meeting.title}">Título</h3>
+                    <p class="meeting-card-desc" th:text="${meeting.description}">Descripción</p>
+                    <div class="meeting-card-meta">
+                        <span class="meta-item">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span th:text="${#temporals.format(meeting.date, 'dd/MM/yyyy')}"></span>
+                        </span>
+                        <span class="meta-item">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span
+                                th:text="${#temporals.format(meeting.startTime, 'HH:mm')} + ' — ' + ${#temporals.format(meeting.endTime, 'HH:mm')}"></span>
+                        </span>
+                        <span class="meta-item">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span th:text="${meeting.location}"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="meeting-card-footer">
+                    <span class="attendee-count">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                        </svg>
+                        <span th:text="${attendanceService.countByMeeting(meeting.id)}"></span> asistente(s)
+                    </span>
+                    <span class="click-hint">Ver detalles →</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel Overlay -->
+        <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+
+        <!-- Side Panel -->
+        <div class="side-panel" id="sidePanel">
+            <div class="panel-header">
+                <h3 class="panel-title" id="panelTitle">Detalle del Encuentro</h3>
+                <button class="panel-close" onclick="closePanel()">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div class="panel-body" id="panelBody">
+                <div class="panel-loading">
+                    <div class="spinner"></div>
+                    <p>Cargando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden meeting data for panel -->
+        <div style="display:none">
+            <div th:each="meeting : ${meetings}" th:id="'data-' + ${meeting.id}" class="meeting-panel-data">
+                <div class="panel-section">
+                    <div class="panel-info-grid">
+                        <div class="panel-info-item">
+                            <span class="info-label">Fecha</span>
+                            <span class="info-value" th:text="${#temporals.format(meeting.date, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="panel-info-item">
+                            <span class="info-label">Horario</span>
+                            <span class="info-value"
+                                th:text="${#temporals.format(meeting.startTime, 'HH:mm')} + ' — ' + ${#temporals.format(meeting.endTime, 'HH:mm')}"></span>
+                        </div>
+                        <div class="panel-info-item">
+                            <span class="info-label">Ubicación</span>
+                            <span class="info-value" th:text="${meeting.location}"></span>
+                        </div>
+                        <div class="panel-info-item">
+                            <span class="info-label">Estado</span>
+                            <span class="badge" th:text="${meeting.status}"
+                                th:classappend="${meeting.locked} ? 'badge-locked' : 'badge-active'"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-section">
+                    <h4 class="panel-section-title">Descripción</h4>
+                    <p class="panel-text" th:text="${meeting.description}"></p>
+                </div>
+                <div class="panel-section">
+                    <h4 class="panel-section-title">
+                        Asistentes
+                        <span class="count-badge" th:text="${attendanceService.countByMeeting(meeting.id)}"></span>
+                    </h4>
+                    <div th:if="${#lists.isEmpty(attendanceService.findByMeeting(meeting.id))}"
+                        class="empty-state-small">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                        </svg>
+                        <span>Sin asistentes registrados</span>
+                    </div>
+                    <div class="attendee-list">
+                        <div th:each="rec : ${attendanceService.findByMeeting(meeting.id)}" class="attendee-item">
+                            <div class="attendee-avatar" th:text="${#strings.substring(rec.displayName, 0, 1)}">A</div>
+                            <div class="attendee-info">
+                                <span class="attendee-name" th:text="${rec.displayName}"></span>
+                                <span class="attendee-time"
+                                    th:text="${#temporals.format(rec.registeredAt, 'dd/MM HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-section">
+                    <h4 class="panel-section-title">Materiales</h4>
+                    <ul class="materials-list">
+                        <li th:each="mat : ${meeting.materials}" class="material-item">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span th:text="${mat}"></span>
+                        </li>
+                    </ul>
+                    <div th:if="${#lists.isEmpty(meeting.materials)}" class="empty-state-small"><span>Sin
+                            materiales</span></div>
+                </div>
+                <div class="panel-actions">
+                    <a th:href="@{/admin/meeting/{id}(id=${meeting.id})}" class="btn btn-secondary btn-sm">Ver detalle
+                        completo</a>
+                    <a th:href="@{/admin/meetings/edit/{id}(id=${meeting.id})}"
+                        class="btn btn-outline btn-sm">Editar</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            function openPanel(card) {
+                const id = card.dataset.id;
+                const data = document.getElementById('data-' + id);
+                if (!data) return;
+                document.getElementById('panelTitle').textContent = card.querySelector('.meeting-card-title').textContent;
+                document.getElementById('panelBody').innerHTML = data.innerHTML;
+                document.getElementById('sidePanel').classList.add('open');
+                document.getElementById('panelOverlay').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            function closePanel() {
+                document.getElementById('sidePanel').classList.remove('open');
+                document.getElementById('panelOverlay').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+        </script>
+    </th:block>
+
+</body>
+
+</html>
